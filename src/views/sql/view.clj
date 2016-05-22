@@ -32,7 +32,8 @@
 
   db-or-db-fn - either a database connection map, or a function that will get passed
                 a namespace and should return a database connection map
-  sql-fn      - a function that returns a sqlvec format SELECT query to be run when
-                this view is refreshed"
+  sql-fn      - a function that returns a JDBC-style vector containing a SELECT query
+                followed by any parameters. this query will be run whenever this view
+                needs to be refreshed."
   [id db-or-db-fn sql-fn & {:keys [row-fn]}]
   (SQLView. id db-or-db-fn sql-fn (or row-fn identity)))
