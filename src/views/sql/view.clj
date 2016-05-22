@@ -8,7 +8,7 @@
 
 ; this implementation based on views-honeysql
 
-(defrecord SQLView [id db-or-db-fn query-fn row-fn]
+(defrecord SQLView [id db-or-db-fn query-fn options]
   IView
   (id [_] id)
   (data [_ namespace parameters]
@@ -16,7 +16,9 @@
                   (db-or-db-fn namespace)
                   db-or-db-fn)
           start (System/currentTimeMillis)
-          data  (jdbc/query db (apply query-fn parameters) {:row-fn row-fn})
+          data  (jdbc/query db
+                            (apply query-fn parameters)
+                            (select-keys options [:row-fn :result-set-fn]))
           time  (- (System/currentTimeMillis) start)]
       (when (>= time 1000) (warn id "took" time "msecs"))
       data))
@@ -35,5 +37,7 @@
   sql-fn      - a function that returns a JDBC-style vector containing a SELECT query
                 followed by any parameters. this query will be run whenever this view
                 needs to be refreshed."
-  [id db-or-db-fn sql-fn & {:keys [row-fn]}]
-  (SQLView. id db-or-db-fn sql-fn (or row-fn identity)))
+  [id db-or-db-fn sql-fn & {:keys [row-fn result-set-fn] :as options
+                            :or   {row-fn        identity
+                                   result-set-fn doall}}]
+  (SQLView. id db-or-db-fn sql-fn options))
