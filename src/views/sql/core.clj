@@ -81,11 +81,21 @@
          result#))))
 
 (defn- execute-sql!
-  [db [sql & params :as sqlvec]]
-  (let [info (query-info sql)]
-    (if (:returning? info)
-      (jdbc/query db sqlvec)
-      (jdbc/execute! db sqlvec))))
+  [db [sql & params :as sqlvec] returning?]
+  (if returning?
+    (jdbc/query db sqlvec)
+    (jdbc/execute! db sqlvec)))
+
+(defn- vexec!*
+  [db [sql & params :as sqlvec] {:keys [parse? namespace tables returning?] :as options}]
+  (let [tables     (if parse? (query-tables sql) tables)
+        returning? (if parse? (:returning? (query-info sql)) returning?)
+        results    (execute-sql! db sqlvec returning?)
+        hint       (views/hint namespace tables hint-type)]
+    (if-let [tx-hints (:views-sql/hints db)]
+      (swap! tx-hints conj hint)
+      (views/put-hints! [hint]))
+    results))
 
 (defn vexec!
   "Used to run any SQL insert/update/delete query on the database while ensuring
@@ -96,15 +106,30 @@
 
    Arguments are:
    - db: a clojure.java.jdbc database connection
-   - namespace (optional): a namespace that will be included in the hints sent out
    - sqlvec: a JDBC-style vector containing a SQL query string followed by any
-             parameters for the query."
-  ([db namespace [sql & params :as sqlvec]]
-   (let [results (execute-sql! db sqlvec)
-         hint    (views/hint namespace (query-tables sql) hint-type)]
-     (if-let [tx-hints (:views-sql/hints db)]
-       (swap! tx-hints conj hint)
-       (views/put-hints! [hint]))
-     results))
-  ([db [sql & params :as sqlvec]]
-   (vexec! db nil sqlvec)))
+             parameters for the query.
+
+   Options are:
+   - namespace: a namespace that will be included in the hints sent out
+
+   NOTE:
+   If the SQL being run cannot be parsed (e.g. due to use of database-specific
+   extensions, or other limitations of JSqlParser), you will need to manually
+   specify the list of table names (as keywords) that the SQL query will affect
+   as the optional tables argument. In addition, if the SQL query includes a
+   RETURNING clause, you should specify :returning true in the options given
+   to vexec!, since automatic detection of this will not work if the SQL cannot
+   be parsed."
+  {:arglists '([db sqlvec & options]
+               [db sqlvec tables & options])}
+  [db sqlvec & options]
+  (let [[first-option & [other-options]] options]
+    (if (or (nil? options)
+            (map? first-option))
+      (vexec!* db sqlvec (-> first-option
+                             (assoc :parse? true)
+                             (dissoc :returning?)))
+      (vexec!* db sqlvec (assoc other-options
+                           :tables (set first-option)
+                           :parse? false)))))
+
