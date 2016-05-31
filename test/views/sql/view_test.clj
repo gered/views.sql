@@ -18,7 +18,7 @@
     (swap! redefs-called assoc name (vec args))
     return-value))
 
-(defn vexec-redefs-fixture [f]
+(defn view-redefs-fixture [f]
   (reset! redefs-called {})
   (with-redefs
     [jdbc/query       (->redef-fn :jdbc/query :jdbc/query-return-value)
@@ -26,7 +26,7 @@
     (f)))
 
 
-(use-fixtures :each clear-query-cache-fixture reset-test-view-system-fixture vexec-redefs-fixture)
+(use-fixtures :each clear-query-cache-fixture reset-test-view-system-fixture view-redefs-fixture)
 
 (deftest basic-sql-view-works
   (let [sqlvec   ["SELECT * FROM foobar"]
