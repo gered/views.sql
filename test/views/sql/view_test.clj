@@ -9,14 +9,6 @@
     [clojure.java.jdbc :as jdbc]
     [views.core :as views]))
 
-(def redefs-called (atom {}))
-
-(defn ->redef-fn
-  [name & [return-value]]
-  (fn [& args]
-    (swap! redefs-called assoc name (vec args))
-    return-value))
-
 (defn view-redefs-fixture [f]
   (reset! redefs-called {})
   (with-redefs
@@ -36,8 +28,7 @@
     (is (= true (relevant? sql-view nil [] [(views/hint nil #{:foobar} hint-type)])))
     (is (= false (relevant? sql-view nil [] [(views/hint nil #{:baz} hint-type)])))
     (is (= :jdbc/query-return-value (data sql-view nil [])))
-    (is (= [test-db sqlvec {}]
-           (:jdbc/query @redefs-called)))))
+    (is (called-with-args? :jdbc/query test-db sqlvec {}))))
 
 (deftest basic-sql-view-works-with-parameters
   (let [sqlvec   ["SELECT * FROM foobar"]
@@ -45,8 +36,7 @@
         sql-view (view :test-view test-db sql-fn)]
     (is (= true (relevant? sql-view nil [1 2] [(views/hint nil #{:foobar} hint-type)])))
     (is (= :jdbc/query-return-value (data sql-view nil [1 2])))
-    (is (= [test-db (into sqlvec [1 2]) {}]
-           (:jdbc/query @redefs-called)))))
+    (is (called-with-args? :jdbc/query test-db (into sqlvec [1 2]) {}))))
 
 (deftest basic-sql-view-works-with-namespace
   (let [sqlvec   ["SELECT * FROM foobar"]
@@ -55,8 +45,7 @@
     (is (= true (relevant? sql-view :abc [] [(views/hint :abc #{:foobar} hint-type)])))
     (is (= false (relevant? sql-view :123 [] [(views/hint :abc #{:foobar} hint-type)])))
     (is (= :jdbc/query-return-value (data sql-view nil [])))
-    (is (= [test-db sqlvec {}]
-           (:jdbc/query @redefs-called)))))
+    (is (called-with-args? :jdbc/query test-db sqlvec {}))))
 
 (deftest view-db-fn-is-used-when-provided
   (let [alt-test-db {:alternate-test-db-conn true}
@@ -65,8 +54,7 @@
         sql-fn      (fn [] sqlvec)
         sql-view    (view :test-view db-fn sql-fn)]
     (is (= :jdbc/query-return-value (data sql-view nil [])))
-    (is (= [alt-test-db sqlvec {}]
-           (:jdbc/query @redefs-called)))))
+    (is (called-with-args? :jdbc/query alt-test-db sqlvec {}))))
 
 (deftest view-db-fn-is-passed-namespace
   (let [test-namespace :test-namespace
@@ -78,8 +66,7 @@
         sql-fn         (fn [] sqlvec)
         sql-view       (view :test-view db-fn sql-fn)]
     (is (= :jdbc/query-return-value (data sql-view test-namespace [])))
-    (is (= [alt-test-db sqlvec {}]
-           (:jdbc/query @redefs-called)))))
+    (is (called-with-args? :jdbc/query alt-test-db sqlvec {}))))
 
 (deftest manually-specified-view-hints-are-used-correctly
   (with-redefs
@@ -92,4 +79,4 @@
       (is (= true (relevant? sql-view nil [] [(views/hint nil #{:bar} hint-type)])))
       (is (= true (relevant? sql-view nil [] [(views/hint nil #{:bar} hint-type)
                                               (views/hint nil #{:foo} hint-type)])))
-      (is (not (contains? @redefs-called :query-tables))))))
+      (is (not-called? :query-tables)))))
