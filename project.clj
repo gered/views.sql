@@ -1,6 +1,6 @@
-(defproject gered/views-sql "0.1.0-SNAPSHOT"
+(defproject gered/views.sql "0.1.0-SNAPSHOT"
   :description  "Plain SQL view implementation for views"
-  :url          "https://github.com/gered/views-honeysql"
+  :url          "https://github.com/gered/views.sql"
 
   :license      {:name "MIT License"
                  :url "http://opensource.org/licenses/MIT"}
