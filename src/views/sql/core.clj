@@ -48,7 +48,7 @@
     (if-not stmt-type
       (throw (new Exception "Unsupported SQL query. Only SELECT, INSERT, UPDATE and DELETE queries are supported!"))
       {:type       stmt-type
-       :returning? (sql-stmt-returning? stmt stmt-type)
+       :returning? (boolean (sql-stmt-returning? stmt stmt-type))
        :tables     (get-query-tables-set stmt)})))
 
 (defonce query-info-cache (atom {}))
