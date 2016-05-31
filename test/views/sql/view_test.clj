@@ -1,5 +1,4 @@
 (ns views.sql.view-test
-  (:import (views.protocols IView))
   (:use
     clojure.test
     views.sql.test-fixtures
