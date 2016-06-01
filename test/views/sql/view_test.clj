@@ -80,3 +80,18 @@
       (is (= true (relevant? sql-view nil [] [(views/hint nil #{:bar} hint-type)
                                               (views/hint nil #{:foo} hint-type)])))
       (is (not-called? :query-tables)))))
+
+(deftest row-and-result-set-fns-are-passed-to-jdbc
+  (let [row-fn        (fn [row] row)
+        result-set-fn (fn [results] results)
+        sqlvec        ["SELECT * FROM foobar"]
+        sql-fn        (fn [] sqlvec)
+        sql-view      (view :test-view test-db sql-fn {:row-fn        row-fn
+                                                       :result-set-fn result-set-fn})]
+    (is (satisfies? IView sql-view))
+    (is (= :test-view (id sql-view)))
+    (is (= true (relevant? sql-view nil [] [(views/hint nil #{:foobar} hint-type)])))
+    (is (= false (relevant? sql-view nil [] [(views/hint nil #{:baz} hint-type)])))
+    (is (= :jdbc/query-return-value (data sql-view nil [])))
+    (is (called-with-args? :jdbc/query test-db sqlvec {:row-fn        row-fn
+                                                       :result-set-fn result-set-fn}))))
