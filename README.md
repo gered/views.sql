@@ -19,7 +19,7 @@ are included within the same system.
 ## Leiningen
 
 ```clj
-[gered/views.sql "0.1.0-SNAPSHOT"]
+[gered/views.sql "0.1"]
 ```
 
 
