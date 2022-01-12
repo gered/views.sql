@@ -5,15 +5,15 @@
   :license      {:name "MIT License"
                  :url "http://opensource.org/licenses/MIT"}
 
-  :dependencies [[org.clojure/tools.logging "0.3.1"]
-                 [com.github.jsqlparser/jsqlparser "0.9.5"]]
+  :dependencies [[com.github.jsqlparser/jsqlparser "4.3"]
+                 [net.gered/views "1.6-SNAPSHOT"]
+                 [org.clojure/tools.logging "1.2.4"]]
 
   :profiles     {:provided
-                 {:dependencies [[org.clojure/clojure "1.8.0"]
-                                 [org.clojure/java.jdbc "0.6.1"]
-                                 [gered/views "1.5"]]}
+                 {:dependencies [[org.clojure/clojure "1.10.3"]
+                                 [org.clojure/java.jdbc "0.7.12"]]}
 
                  :test
-                 {:dependencies [[pjstadig/humane-test-output "0.8.0"]]
+                 {:dependencies [[pjstadig/humane-test-output "0.11.0"]]
                   :injections   [(require 'pjstadig.humane-test-output)
                                  (pjstadig.humane-test-output/activate!)]}})
