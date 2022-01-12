@@ -1,4 +1,4 @@
-(defproject net.gered/views.sql "0.2.0-SNAPSHOT"
+(defproject net.gered/views.sql "0.2.0"
   :description         "Plain SQL view implementation for views"
   :url                 "https://github.com/gered/views.sql"
   :license             {:name "MIT License"
