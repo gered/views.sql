@@ -18,10 +18,7 @@ are included within the same system.
 
 ## Leiningen
 
-```clj
-[gered/views.sql "0.1"]
-```
-
+[![](https://clojars.org/net.gered/views.sql/latest-version.svg)](https://clojars.org/net.gered/views.sql)
 
 ## Creating SQL Views
 
@@ -271,6 +268,6 @@ automatic detection of a RETURNING clause so we need to help out
 
 ## License
 
-Copyright © 2016 Gered King
+Copyright © 2022 Gered King
 
 Distributed under the MIT License.
