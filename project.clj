@@ -1,4 +1,4 @@
-(defproject gered/views.sql "0.2-SNAPSHOT"
+(defproject net.gered/views.sql "0.2-SNAPSHOT"
   :description  "Plain SQL view implementation for views"
   :url          "https://github.com/gered/views.sql"
 
