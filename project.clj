@@ -5,7 +5,7 @@
                         :url "http://opensource.org/licenses/MIT"}
 
   :dependencies        [[com.github.jsqlparser/jsqlparser "4.3"]
-                        [net.gered/views "1.6-SNAPSHOT"]
+                        [net.gered/views "1.6.0"]
                         [org.clojure/tools.logging "1.2.4"]]
 
   :profiles            {:provided
